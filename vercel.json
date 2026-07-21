@@ -1,0 +1,12 @@
+{
+  "framework": "nextjs",
+  "buildCommand": "next build",
+  "outputDirectory": ".next",
+  "installCommand": "npm install",
+  "crons": [
+    {
+      "path": "/api/cron/attendance-reminder",
+      "schedule": "0 8 * * 1-5"
+    }
+  ]
+}
