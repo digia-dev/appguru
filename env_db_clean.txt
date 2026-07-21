@@ -1,1 +1,1 @@
-postgresql://postgres:%23M412keting@db.ipvkqzpxstugemftmhem.supabase.co:5432/postgres
+postgresql://postgres.ipvkqzpxstugemftmhem:%23M412keting@aws-0-ap-southeast-1.pooler.supabase.com:5432/postgres
