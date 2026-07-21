@@ -1,7 +1,7 @@
 "use server";
 
 import { z } from "zod";
-import { prisma, withError } from "@/lib/prisma";
+import { db, withError } from "@/lib/prisma";
 import { parseError } from "@/lib/utils";
 import { revalidatePath } from "next/cache";
 
@@ -20,13 +20,14 @@ const gradeBabSchema = z.object({
 });
 
 export async function getGrades(classId: string, semester: "GANJIL" | "GENAP") {
-  return withError(() =>
-    prisma.grade.findMany({
-      where: { classId, semester },
-      include: { student: true, gradeBab: true },
-      orderBy: { student: { name: "asc" } },
-    }),
-  );
+  return withError(async () => {
+    const { data, error } = await db.from("Grade")
+      .select("*, Student(*), GradeBab(*)")
+      .eq("classId", classId)
+      .eq("semester", semester);
+    if (error) throw error;
+    return data!;
+  });
 }
 
 export async function upsertGrade(formData: FormData) {
@@ -40,19 +41,12 @@ export async function upsertGrade(formData: FormData) {
   const sikapTggJawab = formData.get("sikapTggJawab") as string | undefined;
 
   return withError(async () => {
-    const existing = await prisma.grade.findUnique({
-      where: { studentId_semester: { studentId, semester } },
-    });
-
-    if (existing) {
-      return prisma.grade.update({
-        where: { id: existing.id },
-        data: { sts, sas, sikapJujur, sikapDisiplin, sikapTggJawab },
-      });
-    }
-    return prisma.grade.create({
-      data: { studentId, classId, semester, sts, sas, sikapJujur, sikapDisiplin, sikapTggJawab },
-    });
+    const { data, error } = await db.from("Grade")
+      .upsert({ studentId, classId, semester, sts, sas, sikapJujur, sikapDisiplin, sikapTggJawab }, { onConflict: "studentId,semester" })
+      .select()
+      .single();
+    if (error) throw error;
+    return data!;
   });
 }
 
@@ -61,39 +55,36 @@ export async function upsertGradeBab(gradeId: string, formData: FormData) {
   if (!parsed.success) return { data: null, error: parseError(parsed.error) };
 
   return withError(async () => {
-    const existing = await prisma.gradeBab.findUnique({
-      where: { gradeId_bab: { gradeId, bab: parsed.data.bab } },
-    });
-
     const pValues = [parsed.data.pengetahuan1, parsed.data.pengetahuan2, parsed.data.pengetahuan3, parsed.data.pengetahuan4, parsed.data.pengetahuan5].filter((v) => v != null);
     const pengetahuanRata = pValues.length > 0 ? Math.round(pValues.reduce((a, b) => a! + b!, 0)! / pValues.length) : null;
 
     const kValues = [parsed.data.keterampilan1, parsed.data.keterampilan2, parsed.data.keterampilan3, parsed.data.keterampilan4, parsed.data.keterampilan5].filter((v) => v != null);
     const keterampilanRata = kValues.length > 0 ? Math.round(kValues.reduce((a, b) => a! + b!, 0)! / kValues.length) : null;
 
-    const data = { ...parsed.data, pengetahuanRata, keterampilanRata };
-
-    if (existing) {
-      return prisma.gradeBab.update({ where: { id: existing.id }, data });
-    }
-    return prisma.gradeBab.create({ data: { ...data, gradeId } });
+    const { data, error } = await db.from("GradeBab")
+      .upsert({ ...parsed.data, gradeId, pengetahuanRata, keterampilanRata }, { onConflict: "gradeId,bab" })
+      .select()
+      .single();
+    if (error) throw error;
+    return data!;
   });
 }
 
 export async function rekapRapor(classId: string, semester: "GANJIL" | "GENAP") {
   return withError(async () => {
-    const grades = await prisma.grade.findMany({
-      where: { classId, semester },
-      include: { student: true, gradeBab: true },
-    });
+    const { data: grades, error } = await db.from("Grade")
+      .select("*, Student(*), GradeBab(*)")
+      .eq("classId", classId)
+      .eq("semester", semester);
+    if (error) throw error;
 
-    return grades.map((g) => {
-      const babs = g.gradeBab;
+    return (grades ?? []).map((g: any) => {
+      const babs = g.GradeBab || [];
       const pRata = babs.length > 0
-        ? Math.round(babs.reduce((sum, b) => sum + (b.pengetahuanRata ?? 0), 0) / babs.length)
+        ? Math.round(babs.reduce((sum: number, b: any) => sum + (b.pengetahuanRata ?? 0), 0) / babs.length)
         : 0;
       const kRata = babs.length > 0
-        ? Math.round(babs.reduce((sum, b) => sum + (b.keterampilanRata ?? 0), 0) / babs.length)
+        ? Math.round(babs.reduce((sum: number, b: any) => sum + (b.keterampilanRata ?? 0), 0) / babs.length)
         : 0;
       const sRata = g.sikapRata ?? 0;
       const nilaiHarian = pRata > 0 && kRata > 0 && sRata > 0
@@ -103,7 +94,7 @@ export async function rekapRapor(classId: string, semester: "GANJIL" | "GENAP") 
       );
 
       return {
-        student: g.student,
+        student: g.Student,
         pengetahuanRata: pRata,
         keterampilanRata: kRata,
         sikapRata: sRata,

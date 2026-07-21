@@ -34,7 +34,7 @@
 - [x] 23. Prisma schema: tabel `learning_activities` (agenda), `academic_events` (kalender)
 - [x] 24. Prisma schema: tabel `savings`, `savings_withdrawals` (kas umum)
 - [x] 25. Prisma schema: tabel `materials` (materi), `notifications`
-- [ ] 26. Prisma migrations: `npx prisma migrate dev` untuk apply ke Supabase (terblokir — DB unreachable dari sini)
+- [ ] 26. Prisma migrations: SQL sudah di-generate (`prisma/migration.sql`), jalan via Supabase Dashboard SQL Editor atau akses endpoint `/api/migrate` via Vercel
 - [ ] 27. Seed script dengan data dummy (users, classes, students) untuk development
 - [x] 28. Implementasi soft delete (`deletedAt`) pada semua tabel utama
 - [x] 29. Database indexes untuk query yang sering dipakai
@@ -142,5 +142,5 @@
 - [ ] 101. Integration testing: Playwright
 - [ ] 102. Setup Supabase local development
 - [ ] 103. CI/CD: GitHub Actions
-- [ ] 104. Deploy ke Vercel
+- [x] 104. Deploy ke Vercel — live at https://appguru-jade.vercel.app (DB tables belum ada, perlu migrasi via Supabase SQL Editor atau pooler)
 - [ ] 105. Dokumentasi: README, API docs, guide penggunaan

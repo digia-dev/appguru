@@ -63,7 +63,7 @@ export default async function GradesPage({ searchParams }: { searchParams: Promi
               <h3 className="mb-4 font-semibold text-gray-900">Nilai Per Bab</h3>
               <div className="grid grid-cols-1 gap-3">
                 {[1, 2, 3, 4].map((bab) => {
-                  const babData = selectedGrade?.gradeBab.find((b) => b.bab === bab);
+                  const babData = selectedGrade?.GradeBab.find((b: any) => b.bab === bab);
                   return (
                     <GradeBabForm key={bab} gradeId={selectedGrade.id} bab={bab} data={babData ?? undefined} />
                   );

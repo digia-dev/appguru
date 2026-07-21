@@ -8,15 +8,15 @@ export default async function SavingsPage({ searchParams }: { searchParams: Prom
   const { data: summary } = classId ? await getSavingsSummary(classId) : { data: [] };
   const { data: withdrawals } = await getWithdrawals();
 
-  const totalSetor = summary?.reduce((sum, s) => {
-    return sum + s.savings.filter((sv) => sv.amountIn).reduce((a, b) => a + (b.amountIn ?? 0), 0);
+  const totalSetor = summary?.reduce((sum: number, s: any) => {
+    return sum + s.Saving.filter((sv: any) => sv.amountIn).reduce((a: number, b: any) => a + (b.amountIn ?? 0), 0);
   }, 0) ?? 0;
 
-  const totalTarik = summary?.reduce((sum, s) => {
-    return sum + s.savings.filter((sv) => sv.amountOut).reduce((a, b) => a + (b.amountOut ?? 0), 0);
+  const totalTarik = summary?.reduce((sum: number, s: any) => {
+    return sum + s.Saving.filter((sv: any) => sv.amountOut).reduce((a: number, b: any) => a + (b.amountOut ?? 0), 0);
   }, 0) ?? 0;
 
-  const totalKasKeluar = withdrawals?.reduce((sum, w) => sum + w.amount, 0) ?? 0;
+  const totalKasKeluar = withdrawals?.reduce((sum: number, w: any) => sum + w.amount, 0) ?? 0;
 
   return (
     <div className="space-y-6">
@@ -69,7 +69,7 @@ export default async function SavingsPage({ searchParams }: { searchParams: Prom
         {classId && summary && summary.length > 0 ? (
           <div className="divide-y divide-gray-100">
             {summary.map((s) => {
-              const saldo = s.savings.reduce((a, b) => a + (b.amountIn ?? 0) - (b.amountOut ?? 0), 0);
+              const saldo = s.Saving.reduce((a: number, b: any) => a + (b.amountIn ?? 0) - (b.amountOut ?? 0), 0);
               return (
                 <div key={s.id} className="flex items-center justify-between px-6 py-4">
                   <div>

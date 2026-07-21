@@ -92,7 +92,7 @@ export default async function AgendaPage({ searchParams }: { searchParams: Promi
                         {dayActivities.map((a) => (
                           <div key={a.id} className="rounded bg-indigo-100 px-1.5 py-1 text-[10px] leading-tight">
                             <span className="font-medium text-indigo-700">{a.startTime}-{a.endTime}</span>
-                            <span className="block text-gray-600">{a.class.name}{a.notes ? `: ${a.notes.slice(0, 20)}${a.notes.length > 20 ? "..." : ""}` : ""}</span>
+                            <span className="block text-gray-600">{a.Class.name}{a.notes ? `: ${a.notes.slice(0, 20)}${a.notes.length > 20 ? "..." : ""}` : ""}</span>
                           </div>
                         ))}
                       </div>

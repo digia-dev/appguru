@@ -46,7 +46,7 @@ export default async function StudentsPage() {
                   <tr key={s.id} className="hover:bg-gray-50">
                     <td className="px-6 py-4 text-sm font-medium text-gray-900">{s.studentId}</td>
                     <td className="px-6 py-4 text-sm text-gray-700">{s.name}</td>
-                    <td className="px-6 py-4 text-sm text-gray-500">{s.class?.name ?? "-"}</td>
+                    <td className="px-6 py-4 text-sm text-gray-500">{s.Class?.name ?? "-"}</td>
                     <td className="px-6 py-4 text-sm text-gray-500">{s.fatherName ?? s.motherName ?? "-"}</td>
                     <td className="px-6 py-4 text-sm text-gray-500">{s.phone ?? "-"}</td>
                   </tr>

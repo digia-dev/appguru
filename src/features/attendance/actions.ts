@@ -1,7 +1,7 @@
 "use server";
 
 import { z } from "zod";
-import { prisma, withError } from "@/lib/prisma";
+import { db, withError } from "@/lib/prisma";
 import { parseError } from "@/lib/utils";
 import { revalidatePath } from "next/cache";
 
@@ -15,24 +15,27 @@ const attendanceSchema = z.object({
 });
 
 export async function getAttendance(classId: string, date: string) {
-  return withError(() =>
-    prisma.attendance.findMany({
-      where: { classId, eventDate: new Date(date) },
-      include: { student: true },
-      orderBy: { student: { name: "asc" } },
-    }),
-  );
+  return withError(async () => {
+    const { data, error } = await db.from("Attendance")
+      .select("*, Student(*)")
+      .eq("classId", classId)
+      .eq("eventDate", new Date(date).toISOString())
+      .order("eventDate", { ascending: true });
+    if (error) throw error;
+    return data!;
+  });
 }
 
 export async function getAttendanceSummary(studentId: string, startDate: string, endDate: string) {
-  return withError(() =>
-    prisma.attendance.findMany({
-      where: {
-        studentId,
-        eventDate: { gte: new Date(startDate), lte: new Date(endDate) },
-      },
-    }),
-  );
+  return withError(async () => {
+    const { data, error } = await db.from("Attendance")
+      .select("*")
+      .eq("studentId", studentId)
+      .gte("eventDate", new Date(startDate).toISOString())
+      .lte("eventDate", new Date(endDate).toISOString());
+    if (error) throw error;
+    return data!;
+  });
 }
 
 export async function upsertAttendance(formData: FormData) {
@@ -40,48 +43,30 @@ export async function upsertAttendance(formData: FormData) {
   if (!parsed.success) return { data: null, error: parseError(parsed.error) };
 
   const { studentId, eventDate, session, ...rest } = parsed.data;
-  const date = new Date(eventDate);
+  const date = new Date(eventDate).toISOString();
 
   const result = await withError(async () => {
-    const existing = await prisma.attendance.findUnique({
-      where: { studentId_eventDate_session: { studentId, eventDate: date, session } },
-    });
-
-    if (existing) {
-      return prisma.attendance.update({
-        where: { id: existing.id },
-        data: rest,
-      });
-    }
-    return prisma.attendance.create({
-      data: { studentId, eventDate: date, session, ...rest },
-    });
+    const { data, error } = await db.from("Attendance")
+      .upsert({ studentId, eventDate: date, session, ...rest }, { onConflict: "studentId,eventDate,session" })
+      .select()
+      .single();
+    if (error) throw error;
+    return data!;
   });
-
   revalidatePath("/dashboard/attendance");
   return result;
 }
 
 export async function bulkAttendance(data: { studentId: string; status: string; classId: string; eventDate: string }[]) {
   return withError(async () => {
-    const tx = data.map((d) =>
-      prisma.attendance.upsert({
-        where: {
-          studentId_eventDate_session: {
-            studentId: d.studentId,
-            eventDate: new Date(d.eventDate),
-            session: 1,
-          },
-        },
-        update: { status: d.status as "H" | "S" | "I" | "A" },
-        create: {
-          studentId: d.studentId,
-          classId: d.classId,
-          eventDate: new Date(d.eventDate),
-          status: d.status as "H" | "S" | "I" | "A",
-        },
-      }),
-    );
-    await prisma.$transaction(tx);
+    const records = data.map((d) => ({
+      studentId: d.studentId,
+      classId: d.classId,
+      eventDate: new Date(d.eventDate).toISOString(),
+      status: d.status,
+      session: 1,
+    }));
+    const { error } = await db.from("Attendance").upsert(records, { onConflict: "studentId,eventDate,session" });
+    if (error) throw error;
   });
 }

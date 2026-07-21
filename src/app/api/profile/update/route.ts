@@ -1,7 +1,7 @@
 import { createClient } from "@/utils/supabase/server";
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
-import { prisma, withError } from "@/lib/prisma";
+import { db } from "@/lib/prisma";
 
 export async function PUT(request: Request) {
   const cookieStore = await cookies();
@@ -15,16 +15,14 @@ export async function PUT(request: Request) {
   const body = await request.json();
   const { name, subject, phone } = body;
 
-  const result = await withError(() =>
-    prisma.user.update({
-      where: { email: user.email! },
-      data: { name, subject, phone },
-    }),
-  );
-
-  if (result.error) {
-    return NextResponse.json({ error: result.error }, { status: 500 });
+  try {
+    const { data, error } = await db.from("User").update({ name, subject, phone }).eq("email", user.email!).select().single();
+    if (error) throw error;
+    return NextResponse.json(data);
+  } catch (e) {
+    return NextResponse.json(
+      { error: e instanceof Error ? e.message : "Gagal update profil" },
+      { status: 500 },
+    );
   }
-
-  return NextResponse.json(result.data);
 }

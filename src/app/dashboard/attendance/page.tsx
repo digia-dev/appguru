@@ -14,7 +14,7 @@ export default async function AttendancePage({ searchParams }: { searchParams: P
   const { data: existing } = selectedClass ? await getAttendance(selectedClass, selectedDate) : { data: [] };
 
   const counts = { H: 0, S: 0, I: 0, A: 0 };
-  existing?.forEach((a) => { counts[a.status]++; });
+  existing?.forEach((a: { status: keyof typeof counts }) => { counts[a.status]++; });
 
   return (
     <div className="space-y-6">
@@ -65,7 +65,7 @@ export default async function AttendancePage({ searchParams }: { searchParams: P
           classId={selectedClass}
           date={selectedDate}
           students={students as { id: string; studentId: string; name: string }[]}
-          existing={(existing ?? []).map((a) => ({ studentId: a.studentId, status: a.status }))}
+          existing={(existing ?? []).map((a: { studentId: string; status: string }) => ({ studentId: a.studentId, status: a.status }))}
         />
       ) : (
         <div className="rounded-xl bg-white p-12 text-center shadow-sm ring-1 ring-gray-100">

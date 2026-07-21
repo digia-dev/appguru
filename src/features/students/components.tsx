@@ -2,9 +2,7 @@
 
 import { useActionState } from "react";
 import { createStudent } from "./actions";
-import type { Class } from "@prisma/client";
-
-export function StudentForm({ classes, student }: { classes: Pick<Class, "id" | "name">[]; student?: { id: string; studentId: string; name: string; classId: string; address: string | null; dob: Date | null; fatherName: string | null; fatherJob: string | null; motherName: string | null; motherJob: string | null; phone: string | null; notes: string | null } }) {
+export function StudentForm({ classes, student }: { classes: { id: string; name: string }[]; student?: { id: string; studentId: string; name: string; classId: string; address: string | null; dob: Date | null; fatherName: string | null; fatherJob: string | null; motherName: string | null; motherJob: string | null; phone: string | null; notes: string | null } }) {
   const [state, action, pending] = useActionState(
     async (_prev: unknown, formData: FormData) => {
       if (student) {

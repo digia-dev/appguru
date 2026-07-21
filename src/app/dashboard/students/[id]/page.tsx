@@ -7,10 +7,10 @@ export default async function StudentDetailPage({ params }: { params: Promise<{ 
   const { data: student } = await getStudentById(id);
   if (!student) notFound();
 
-  const hadir = student.attendance.filter((a) => a.status === "H").length;
-  const sakit = student.attendance.filter((a) => a.status === "S").length;
-  const izin = student.attendance.filter((a) => a.status === "I").length;
-  const alfa = student.attendance.filter((a) => a.status === "A").length;
+  const hadir = student.Attendance.filter((a: any) => a.status === "H").length;
+  const sakit = student.Attendance.filter((a: any) => a.status === "S").length;
+  const izin = student.Attendance.filter((a: any) => a.status === "I").length;
+  const alfa = student.Attendance.filter((a: any) => a.status === "A").length;
 
   return (
     <div className="space-y-6">
@@ -29,7 +29,7 @@ export default async function StudentDetailPage({ params }: { params: Promise<{ 
             </div>
             <h2 className="mt-4 text-xl font-bold text-gray-900">{student.name}</h2>
             <p className="text-sm text-gray-500">NIS: {student.studentId}</p>
-            <p className="text-sm text-gray-500">Kelas: {student.class.name}</p>
+            <p className="text-sm text-gray-500">Kelas: {student.Class.name}</p>
           </div>
 
           <div className="mt-4 rounded-xl bg-white p-6 shadow-sm ring-1 ring-gray-100">
@@ -70,21 +70,21 @@ export default async function StudentDetailPage({ params }: { params: Promise<{ 
             </div>
           </div>
 
-          {student.grades.length > 0 && (
+          {student.Grade.length > 0 && (
             <div className="rounded-xl bg-white p-6 shadow-sm ring-1 ring-gray-100">
               <h3 className="mb-4 font-semibold text-gray-900">Nilai</h3>
               <div className="space-y-3">
-                {student.grades.map((g) => (
+                {student.Grade.map((g: any) => (
                   <div key={g.id} className="rounded-lg border p-4">
                     <p className="text-sm font-medium text-gray-700">Semester {g.semester}</p>
                     <div className="mt-2 grid grid-cols-3 gap-3 text-sm">
                       <div><span className="text-gray-500">STS:</span> <span className="font-medium">{g.sts ?? "-"}</span></div>
                       <div><span className="text-gray-500">SAS:</span> <span className="font-medium">{g.sas ?? "-"}</span></div>
                     </div>
-                    {g.gradeBab.length > 0 && (
+                    {g.GradeBab.length > 0 && (
                       <div className="mt-2">
                         <p className="mb-1 text-xs font-medium text-gray-500">Per BAB:</p>
-                        {g.gradeBab.map((b) => (
+                        {g.GradeBab.map((b: any) => (
                           <span key={b.id} className="mr-2 inline-block rounded bg-gray-100 px-2 py-0.5 text-xs">
                             Bab {b.bab}: {b.pengetahuanRata ?? "-"}/{b.keterampilanRata ?? "-"}
                           </span>

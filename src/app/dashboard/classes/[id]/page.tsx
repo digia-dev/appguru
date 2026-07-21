@@ -26,14 +26,14 @@ export default async function ClassDetailPage({ params }: { params: Promise<{ id
 
       <div className="rounded-xl bg-white shadow-sm ring-1 ring-gray-100">
         <div className="flex items-center justify-between border-b border-gray-100 px-6 py-4">
-          <h3 className="font-semibold text-gray-900">Daftar Siswa ({cls.students.length})</h3>
+          <h3 className="font-semibold text-gray-900">Daftar Siswa ({cls.Student.length})</h3>
           <Link href={`/dashboard/students?classId=${id}`} className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-indigo-700">
             + Tambah Siswa
           </Link>
         </div>
 
         <div className="overflow-x-auto">
-          {cls.students.length === 0 ? (
+          {cls.Student.length === 0 ? (
             <p className="px-6 py-12 text-center text-sm text-gray-500">Belum ada siswa di kelas ini.</p>
           ) : (
             <table className="w-full">
@@ -47,7 +47,7 @@ export default async function ClassDetailPage({ params }: { params: Promise<{ id
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100">
-                {cls.students.filter(s => !s.deletedAt).map((s) => (
+                {cls.Student.filter((s: any) => !s.deletedAt).map((s: any) => (
                   <tr key={s.id} className="hover:bg-gray-50">
                     <td className="px-6 py-4 text-sm font-medium text-gray-900">{s.studentId}</td>
                     <td className="px-6 py-4 text-sm text-gray-700">{s.name}</td>
